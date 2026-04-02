@@ -20,10 +20,14 @@ Opens at [localhost:3000](http://localhost:3000).
 - **Export Configurations**: Save your favorite looks as JSON or plug-and-play JS code snippets.
 - **Modern Stack**: Built with Next.js 15, React 19, Tailwind CSS v4, Motion, and DialKit.
 
+## Stack
+
+Next.js 15 &middot; React 19 &middot; Tailwind CSS v4 &middot; Motion &middot; DialKit
+
 ## Credits
 
 - This project is a fork of [lenxism/dither](https://github.com/lenxism/dither).
-- Originally inspired by the dithered particle effect [Emil Kowalski](https://x.com/emilkowalski_) built for [linear.app/next](https://linear.app/next).
+- Originally inspired by the dithered particle effect [Emil Kowalski](https://x.com/emilkowalski_) built for [linear.app/next](https://linear.app/next). See his [original tweet](https://x.com/emilkowalski/status/2036778116748542220).
 
 ## License
 
