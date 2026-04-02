@@ -61,12 +61,12 @@ export default function Home() {
         </a>{" "}
         <span className="text-black/25">•</span>{" "}
         <a
-          href="https://github.com/lenxism/dither"
+          href="https://github.com/its-thepoe/dither"
           target="_blank"
           rel="noopener noreferrer"
           className={footerLinkClass}
         >
-          Inspo
+          GitHub
         </a>
       </span>
     </div>
