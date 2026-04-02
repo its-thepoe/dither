@@ -19,7 +19,7 @@ import {
   generateBlueNoise,
   invertWithMask,
 } from "@/lib/dither-algorithms";
-import { processImage, loadImage } from "@/lib/image-processing";
+import { processImage, loadImageCached, warmImageCache } from "@/lib/image-processing";
 import {
   attachDotRgb,
   createDotSystem,
@@ -252,6 +252,10 @@ export default function ParticleCanvas({
   }, []);
 
   useEffect(() => {
+    warmImageCache(Object.values(LOGO_PRESETS));
+  }, []);
+
+  useEffect(() => {
     const presetPath =
       LOGO_PRESETS[params.logo as keyof typeof LOGO_PRESETS] ?? LOGO_PRESETS.linear;
     const logo = params.logo as string;
@@ -323,7 +327,7 @@ export default function ParticleCanvas({
       let gw = GRID_SIZE;
       let gh = GRID_SIZE;
 
-      const img = await loadImage(src);
+      const img = await loadImageCached(src);
 
       const processed = processImage(
         img,

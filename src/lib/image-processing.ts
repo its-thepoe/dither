@@ -19,6 +19,39 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+const imageElementCache = new Map<string, HTMLImageElement>();
+const imageInflight = new Map<string, Promise<HTMLImageElement>>();
+
+/** Resolves from cache when already loaded; dedupes concurrent loads for the same URL. */
+export function loadImageCached(src: string): Promise<HTMLImageElement> {
+  const cached = imageElementCache.get(src);
+  if (cached && cached.complete && cached.naturalWidth > 0) {
+    return Promise.resolve(cached);
+  }
+  const inflight = imageInflight.get(src);
+  if (inflight) return inflight;
+
+  const p = loadImage(src)
+    .then((img) => {
+      imageElementCache.set(src, img);
+      imageInflight.delete(src);
+      return img;
+    })
+    .catch((err) => {
+      imageInflight.delete(src);
+      throw err;
+    });
+  imageInflight.set(src, p);
+  return p;
+}
+
+/** Start loading URLs early so first logo switch does not wait on cold network. */
+export function warmImageCache(urls: readonly string[]): void {
+  for (const url of urls) {
+    void loadImageCached(url).catch(() => {});
+  }
+}
+
 /**
  * Scale image to fit within maxDimension while preserving aspect ratio,
  * then sample at every `scale` pixels to create the dot grid.
