@@ -1,8 +1,8 @@
 # Dither Playground
 
-Upload an image and watch it come alive as interactive dithered particles. Hover to push them, click to explode.
+Interactive dithered particles that react to your touch. Upload a logo and watch it come alive with its original colors preserved. Hover to push, click to shatter. Minimalist, high-performance, and beautiful.
 
-Supports Floyd-Steinberg, Bayer, and blue-noise dithering with a live control panel to tweak everything in real time.
+Support for Floyd-Steinberg, Bayer, and Blue-Noise dithering with a live control panel to tweak everything in real time.
 
 ## Running locally
 
@@ -13,19 +13,17 @@ npm run dev
 
 Opens at [localhost:3000](http://localhost:3000).
 
-## Stack
+## Features
 
-Next.js 15 &middot; React 19 &middot; Tailwind CSS v4 &middot; Motion &middot; DialKit
-
-## Issues & contributions
-
-Bug reports and ideas are welcome -- open an issue.
-
-Pull requests are not being reviewed at this time.
+- **Interactive Physics**: Particles follow your mouse and react to clicks with explosive force.
+- **Color Preservation**: Modified to allow your logo's original color to shine through the dithered effect.
+- **Export Configurations**: Save your favorite looks as JSON or plug-and-play JS code snippets.
+- **Modern Stack**: Built with Next.js 15, React 19, Tailwind CSS v4, Motion, and DialKit.
 
 ## Credits
 
-Inspired by the dithered particle effect [Emil Kowalski](https://x.com/emilkowalski_) built for [linear.app/next](https://linear.app/next). See his [original tweet](https://x.com/emilkowalski/status/2036778116748542220).
+- This project is a fork of [lenxism/dither](https://github.com/lenxism/dither).
+- Originally inspired by the dithered particle effect [Emil Kowalski](https://x.com/emilkowalski_) built for [linear.app/next](https://linear.app/next).
 
 ## License
 
