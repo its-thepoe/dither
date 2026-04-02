@@ -1,6 +1,8 @@
 export interface ProcessedImage {
   grayscale: Uint8Array;
   alpha: Uint8Array;
+  /** Packed RGB per grid cell, length `width * height * 3` (un-premultiplied blurred sample). */
+  rgb: Uint8Array;
   width: number;
   height: number;
 }
@@ -10,7 +12,9 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onerror = () => {
+      reject(new Error(`Failed to load image: ${src}`));
+    };
     img.src = src;
   });
 }
@@ -80,6 +84,7 @@ export function processImage(
   const sampledH = Math.ceil(outH / scale);
   const grayscale = new Uint8Array(sampledW * sampledH);
   const alpha = new Uint8Array(sampledW * sampledH);
+  const rgb = new Uint8Array(sampledW * sampledH * 3);
 
   const contrastFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
@@ -122,8 +127,21 @@ export function processImage(
       }
 
       grayscale[sy * sampledW + sx] = Math.max(0, Math.min(255, Math.round(luma)));
+
+      let ur = 0;
+      let ug = 0;
+      let ub = 0;
+      if (blurredAlpha > 0.01) {
+        ur = r / blurredAlpha;
+        ug = g / blurredAlpha;
+        ub = b / blurredAlpha;
+      }
+      const cell = (sy * sampledW + sx) * 3;
+      rgb[cell] = Math.max(0, Math.min(255, Math.round(ur)));
+      rgb[cell + 1] = Math.max(0, Math.min(255, Math.round(ug)));
+      rgb[cell + 2] = Math.max(0, Math.min(255, Math.round(ub)));
     }
   }
 
-  return { grayscale, alpha, width: sampledW, height: sampledH };
+  return { grayscale, alpha, rgb, width: sampledW, height: sampledH };
 }

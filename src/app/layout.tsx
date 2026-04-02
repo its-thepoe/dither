@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AgentationDev } from "@/components/agentation-dev";
 import { DialKitProvider } from "./dialkit-provider";
 
 export const metadata: Metadata = {
@@ -14,9 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <DialKitProvider>{children}</DialKitProvider>
+        <AgentationDev />
       </body>
     </html>
   );

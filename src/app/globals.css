@@ -18,3 +18,28 @@ body {
 ::selection {
   background: rgba(255, 255, 255, 0.15);
 }
+
+/* DialKit: narrow panel — balance row label vs selected value (avoid "Solid dot c…"). */
+.dialkit-panel-inner .dialkit-select-trigger {
+  gap: 8px;
+}
+
+.dialkit-panel-inner .dialkit-select-label {
+  flex: 0 1 auto;
+  max-width: 46%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dialkit-panel-inner .dialkit-select-right {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.dialkit-panel-inner .dialkit-select-value {
+  flex: 0 1 auto;
+  max-width: 100%;
+  text-align: right;
+}
