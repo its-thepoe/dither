@@ -3,7 +3,9 @@ import { DialStore } from "dialkit";
 /** Public paths for built-in logos (single source of truth for export/import). */
 export const LOGO_PRESETS = {
   linear: "/linear-app-icon.png",
-  cube: "/CUBE_2D_LIGHT.png",
+  cursor: "/cursor-2d-icon.png",
+  dispensary: "/dispensary-app-icon.png",
+  mockhaus: "/mockhaus-icon.png",
 } as const;
 
 export type LogoPresetId = keyof typeof LOGO_PRESETS;
@@ -174,7 +176,7 @@ function isPresetImageV1(img: unknown): img is DitherPresetImageV1 {
   const k = (img as { kind: unknown }).kind;
   if (k === "preset") {
     const preset = (img as { preset?: unknown }).preset;
-    return preset === "linear" || preset === "cube";
+    return typeof preset === "string" && preset in LOGO_PRESETS;
   }
   if (k === "custom") {
     const dataUrl = (img as { dataUrl?: unknown }).dataUrl;

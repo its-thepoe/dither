@@ -19,7 +19,6 @@ body {
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* DialKit: narrow panel — balance row label vs selected value (avoid "Solid dot c…"). */
 .dialkit-panel-inner .dialkit-select-trigger {
   gap: 8px;
 }

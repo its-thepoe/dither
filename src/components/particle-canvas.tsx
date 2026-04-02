@@ -85,7 +85,9 @@ export default function ParticleCanvas({
       type: "select",
       options: [
         { value: "linear", label: "Linear" },
-        { value: "cube", label: "Cube" },
+        { value: "cursor", label: "Cursor" },
+        { value: "dispensary", label: "Dispensary" },
+        { value: "mockhaus", label: "Mockhaus" },
       ],
       default: "linear",
     },
@@ -107,7 +109,7 @@ export default function ParticleCanvas({
 
     shape: {
       _collapsed: true,
-      cornerRadius: [0.28, 0, 0.5, 0.01],
+      cornerRadius: [0, 0, 0.5, 0.01],
     },
 
     color: {

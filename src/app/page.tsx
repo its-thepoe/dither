@@ -9,7 +9,6 @@ const footerLinkClass =
 
 const footerWordmarkClass = "h-4 w-auto shrink-0";
 
-/** Nudge wordmark down so it lines up with 11px caption baseline (SVG was sitting high with items-center). */
 const poeWordmarkLinkClass = `${footerLinkClass} translate-y-[5px]`;
 
 export default function Home() {
