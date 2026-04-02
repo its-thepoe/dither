@@ -187,6 +187,7 @@ export function invertWithMask(
   const inverted: number[] = [];
   for (const idx of mask) {
     if (!logoSet.has(idx)) {
+      if (alpha && alpha[idx] < 128) continue;
       inverted.push(idx % gridW, Math.floor(idx / gridW));
     }
   }
