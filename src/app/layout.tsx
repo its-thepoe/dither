@@ -6,7 +6,7 @@ import { DialKitProvider } from "./dialkit-provider";
 export const metadata: Metadata = {
   title: "Dither Playground",
   description:
-    "Upload a logo and watch it come alive as interactive dithered particles. Hover to push, click to explode.",
+    "Upload a logo and watch it come alive as interactive dithered particles. Hover to push, click to explode. Modified to allow your logo's colour shine through.",
   icons: {
     icon: "/favicon.ico",
   },

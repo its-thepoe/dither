@@ -78,6 +78,7 @@ export default function ParticleCanvas({
         { value: "sampled", label: "Sampled" },
       ],
       default: "solid",
+      label: "Dot colour mode"
     },
 
     logo: {
@@ -111,10 +112,11 @@ export default function ParticleCanvas({
 
     color: {
       _collapsed: true,
-      dotLight: { type: "color", default: "#000000" },
-      bgLight: { type: "color", default: "#ffffff" },
-      dotDark: { type: "color", default: "#8a8f99" },
-      bgDark: { type: "color", default: "#0a0a0a" },
+      label: "Colour",
+      dotLight: { type: "color", default: "#000000", label: "Dot light" },
+      bgLight: { type: "color", default: "#ffffff", label: "BG light" },
+      dotDark: { type: "color", default: "#8a8f99", label: "Dot dark" },
+      bgDark: { type: "color", default: "#0a0a0a", label: "BG dark" },
     },
 
     upload: { type: "action", label: "Upload image" },
