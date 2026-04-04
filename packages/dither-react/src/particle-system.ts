@@ -17,15 +17,24 @@ export interface DotSystem {
   dotRgb?: Uint8Array;
 }
 
-const SHOCKWAVE_SPEED = 225;
-const SHOCKWAVE_WIDTH = 37;
-const SHOCKWAVE_STRENGTH = 20;
+export const DEFAULT_SHOCKWAVE_SPEED = 225;
+export const DEFAULT_SHOCKWAVE_WIDTH = 37;
+export const DEFAULT_SHOCKWAVE_STRENGTH = 20;
 const SHOCKWAVE_DURATION = 675;
-const MOUSE_RADIUS = 100;
-const MOUSE_RADIUS_SQ = MOUSE_RADIUS * MOUSE_RADIUS;
-const MOUSE_FORCE_PEAK = 40;
+export const DEFAULT_MOUSE_RADIUS = 100;
+export const DEFAULT_MOUSE_FORCE_PEAK = 40;
 const EASING = 0.12;
 const SNAP_THRESHOLD = 0.01;
+
+export interface UpdateDotsOptions {
+  /** When false, dots snap to rest and shockwaves are cleared (e.g. prefers-reduced-motion). */
+  interactionEnabled?: boolean;
+  /**
+   * Scales pointer radius, pointer force, and shockwave speed/width/strength (default 1).
+   * Use values &lt; 1 on small canvases to reduce edge clipping.
+   */
+  interactionScale?: number;
+}
 
 export function parseHexToRgb(hex: string): { r: number; g: number; b: number } {
   const s = hex.trim();
@@ -105,9 +114,29 @@ export function updateDots(
   mouseY: number,
   mouseActive: boolean,
   shockwaves: Shockwave[],
-  now: number
+  now: number,
+  opts?: UpdateDotsOptions
 ): boolean {
   const { count, baseX, baseY, dx, dy } = sys;
+
+  const interactionEnabled = opts?.interactionEnabled !== false;
+  const scale = Math.max(0.05, Math.min(4, opts?.interactionScale ?? 1));
+
+  const mouseRadius = DEFAULT_MOUSE_RADIUS * scale;
+  const mouseRadiusSq = mouseRadius * mouseRadius;
+  const mousePeak = DEFAULT_MOUSE_FORCE_PEAK * scale;
+  const shockSpeed = DEFAULT_SHOCKWAVE_SPEED * scale;
+  const shockWidth = DEFAULT_SHOCKWAVE_WIDTH * scale;
+  const shockStrength = DEFAULT_SHOCKWAVE_STRENGTH * scale;
+
+  if (!interactionEnabled) {
+    shockwaves.length = 0;
+    for (let i = 0; i < count; i++) {
+      dx[i] = 0;
+      dy[i] = 0;
+    }
+    return false;
+  }
 
   let numActive = shockwaves.length;
   for (let k = shockwaves.length - 1; k >= 0; k--) {
@@ -129,10 +158,10 @@ export function updateDots(
       const vy = baseY[i] + dy[i] - mouseY;
       const dist2 = vx * vx + vy * vy;
 
-      if (dist2 > 0.1 && dist2 < MOUSE_RADIUS_SQ) {
+      if (dist2 > 0.1 && dist2 < mouseRadiusSq) {
         const dist = Math.sqrt(dist2);
-        const falloff = 1 - dist / MOUSE_RADIUS;
-        const force = falloff * falloff * falloff * MOUSE_FORCE_PEAK;
+        const falloff = 1 - dist / mouseRadius;
+        const force = falloff * falloff * falloff * mousePeak;
         targetFx += (vx / dist) * force;
         targetFy += (vy / dist) * force;
       }
@@ -141,7 +170,7 @@ export function updateDots(
     for (let k = 0; k < shockwaves.length; k++) {
       const sw = shockwaves[k];
       const elapsed = now - sw.start;
-      const radius = (elapsed / 1000) * SHOCKWAVE_SPEED;
+      const radius = (elapsed / 1000) * shockSpeed;
       const life = 1 - elapsed / SHOCKWAVE_DURATION;
 
       const sx = baseX[i] - sw.x;
@@ -150,9 +179,9 @@ export function updateDots(
 
       if (dist >= 0.1) {
         const band = Math.abs(dist - radius);
-        if (band < SHOCKWAVE_WIDTH) {
+        if (band < shockWidth) {
           const waveForce =
-            (1 - band / SHOCKWAVE_WIDTH) * life * SHOCKWAVE_STRENGTH * shockMultiplier;
+            (1 - band / shockWidth) * life * shockStrength * shockMultiplier;
           targetFx += (sx / dist) * waveForce;
           targetFy += (sy / dist) * waveForce;
         }

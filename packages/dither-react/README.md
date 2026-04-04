@@ -60,10 +60,27 @@ export function Hero() {
 |------|------|---------|-------------|
 | `imageSrc` | `string` | (required) | Any URL the browser can load: `https:`, same-origin path, `blob:`, or `data:image/...`. |
 | `params` | `Partial<DitherCanvasParams>` | — | Merged with `DEFAULT_PLAYGROUND_PARAMS` (algorithm, scale, colours, dither, etc.). |
-| `className` / `style` | — | — | Passed to the `<canvas>`. Size the parent; the canvas uses `width`/`height` from layout × DPR. |
-| `syncPageBackground` | `boolean` | `false` | When `true`, sets `document.documentElement` and `body` background to the effective canvas background (playground behaviour). |
+| `className` / `style` | — | — | Passed to the `<canvas>` after built-in cursor/background. Your `style` wins on duplicate keys. |
+| `transparentCanvas` | `boolean` | `false` | Skips the default CSS `background` on the canvas (use on layered or gradient pages). |
+| `syncPageBackground` | `boolean` | `false` | When `true`, sets `document.documentElement` and `body` background to the effective canvas colour. Ignored if `transparentCanvas` is `true`. |
+| `layoutInsetPx` | `number` | `0` | Insets the dot field from the canvas edges (CSS px), reducing clipping when dots move with pointer/shockwaves. |
+| `interactionScale` | `number` | `1` | Scales pointer radius, pointer force, and shockwave strength (clamped ~0.05–4). Lower on small embeds. |
+| `respectPrefersReducedMotion` | `boolean` | `false` | Listens for `prefers-reduced-motion: reduce` and disables pointer + shockwave motion (static dither). |
+| `fallbackImageSrc` | `string` | — | If `imageSrc` fails to load or process, the canvas rebuilds once from this URL. |
 | `warmPresetLogosOnMount` | `boolean` | `false` | Prewarms bundled built-in logo requests (`LOGO_PRESET_URLS`). |
-| `onLoadError` | `(err: unknown) => void` | — | Decode / processing failures. |
+| `onLoadError` | `(err: unknown) => void` | — | Called on load/process failure (including if the fallback also fails). |
+
+### Embedding small fixed-size canvases
+
+Pointer and shockwave motion are computed in **canvas pixel space**. Dots that move outside the bitmap are **clipped**, which shows up as harsh edges on tight fixed-size heroes or cards.
+
+Mitigations (combine as needed):
+
+1. **`layoutInsetPx`** — Pulls the laid-out dot grid inward so motion has room before hitting the clip rect (same idea as oversized wrapper + lower scale, but explicit).
+2. **`interactionScale`** — Use values like `0.5`–`0.85` to soften radius and forces on small surfaces.
+3. **Larger canvas** — Give the element more layout size or overflow room if your design allows.
+
+Default physics constants are exported if you need to document or mirror them: `DEFAULT_MOUSE_RADIUS`, `DEFAULT_MOUSE_FORCE_PEAK`, `DEFAULT_SHOCKWAVE_SPEED`, `DEFAULT_SHOCKWAVE_WIDTH`, `DEFAULT_SHOCKWAVE_STRENGTH`.
 
 ### Built-in logos
 
@@ -141,4 +158,4 @@ Adjust `name` / `--access` if you use a private registry or non-scoped package.
 
 ## Exports
 
-Besides `DitherCanvas`, the package re-exports core helpers (`processImage`, `createDotSystem`, `updateDots`, `renderDots`, etc.) for advanced integrations.
+Besides `DitherCanvas`, the package re-exports core helpers (`processImage`, `createDotSystem`, `updateDots`, `renderDots`, `UpdateDotsOptions`, default physics constants, etc.) for advanced integrations.

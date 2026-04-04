@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback, type CSSProperties } from "react";
+import { useRef, useEffect, useCallback, useState, type CSSProperties } from "react";
 import type { DitherAlgorithm } from "./dither-algorithms";
 import {
   floydSteinberg,
@@ -17,6 +17,7 @@ import {
   renderDots,
   type DotSystem,
   type Shockwave,
+  type UpdateDotsOptions,
 } from "./particle-system";
 import {
   mergeDitherParams,
@@ -26,17 +27,37 @@ import {
 import { LOGO_PRESET_URLS } from "./logo-presets";
 import { useIsMobile } from "./use-is-mobile";
 
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
 export interface DitherCanvasProps {
   imageSrc: string;
   /** Partial params are merged with `DEFAULT_PLAYGROUND_PARAMS`. */
   params?: Partial<DitherCanvasParams>;
   className?: string;
   style?: CSSProperties;
-  /** When true, sets `document.documentElement` and `body` background to the effective canvas background (playground behavior). */
+  /** When true, sets `document.documentElement` and `body` background to the effective canvas background (playground behavior). Ignored when `transparentCanvas` is true. */
   syncPageBackground?: boolean;
+  /** When true, the canvas element has no CSS background colour (for layered / non-solid pages). */
+  transparentCanvas?: boolean;
+  /**
+   * Shrinks the laid-out dot field away from the canvas edges (CSS pixels), reducing clipping
+   * when pointer/shockwave motion pushes dots outward.
+   */
+  layoutInsetPx?: number;
+  /**
+   * Scales pointer influence and shockwave strength (default 1). Try 0.5–0.85 on small fixed-size embeds.
+   */
+  interactionScale?: number;
+  /**
+   * When true, listens for `prefers-reduced-motion: reduce` and disables pointer/shockwave physics
+   * (static dither only).
+   */
+  respectPrefersReducedMotion?: boolean;
+  /** If the primary `imageSrc` fails to load or process, rebuild once using this URL. */
+  fallbackImageSrc?: string;
   /** Prewarm bundled logo image requests. */
   warmPresetLogosOnMount?: boolean;
-  /** Called when image load or processing fails. */
+  /** Called when image load or processing fails (including after a failed fallback). */
   onLoadError?: (error: unknown) => void;
 }
 
@@ -46,6 +67,11 @@ export function DitherCanvas({
   className,
   style,
   syncPageBackground = false,
+  transparentCanvas = false,
+  layoutInsetPx = 0,
+  interactionScale = 1,
+  respectPrefersReducedMotion = false,
+  fallbackImageSrc,
   warmPresetLogosOnMount = false,
   onLoadError,
 }: DitherCanvasProps) {
@@ -57,7 +83,43 @@ export function DitherCanvas({
   const runningRef = useRef(false);
   const blueNoiseRef = useRef<Uint8Array | null>(null);
   const prevConfigRef = useRef<string>("");
+  const physicsRef = useRef<UpdateDotsOptions>({
+    interactionEnabled: true,
+    interactionScale: 1,
+  });
   const isMobile = useIsMobile();
+
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [fallbackFromError, setFallbackFromError] = useState<string | null>(null);
+  const fallbackAttemptedRef = useRef(false);
+
+  useEffect(() => {
+    if (!respectPrefersReducedMotion || typeof window === "undefined") {
+      setPrefersReducedMotion(false);
+      return;
+    }
+    const mql = window.matchMedia(REDUCED_MOTION_QUERY);
+    setPrefersReducedMotion(mql.matches);
+    const onChange = () => setPrefersReducedMotion(mql.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, [respectPrefersReducedMotion]);
+
+  useEffect(() => {
+    setFallbackFromError(null);
+    fallbackAttemptedRef.current = false;
+  }, [imageSrc]);
+
+  const effectiveImageSrc = fallbackFromError ?? imageSrc;
+
+  const interactionEnabled = !respectPrefersReducedMotion || !prefersReducedMotion;
+
+  useEffect(() => {
+    physicsRef.current = {
+      interactionEnabled,
+      interactionScale,
+    };
+  }, [interactionEnabled, interactionScale]);
 
   const params = mergeDitherParams(paramsProp);
 
@@ -66,6 +128,8 @@ export function DitherCanvas({
   const effDot = params.invert ? params.color.dotLight : params.color.dotDark;
   const effBg = params.invert ? params.color.bgLight : params.color.bgDark;
   const sampledDots = params.dotColorMode === "sampled";
+
+  const inset = Math.max(0, layoutInsetPx);
 
   const startLoop = useCallback(() => {
     if (runningRef.current) return;
@@ -90,7 +154,8 @@ export function DitherCanvas({
         mouseRef.current.y,
         mouseRef.current.active,
         shockwavesRef.current,
-        performance.now()
+        performance.now(),
+        physicsRef.current
       );
 
       renderDots(ctx, sys, rect.width, rect.height, dpr, {
@@ -172,9 +237,11 @@ export function DitherCanvas({
         );
       }
 
-      const s = Math.max(0.5, Math.min(rect.width, rect.height) * params.scale / Math.max(gw, gh));
-      const ox = Math.round((rect.width - gw * s) / 2);
-      const oy = Math.round((rect.height - gh * s) / 2);
+      const rw = Math.max(1, rect.width - 2 * inset);
+      const rh = Math.max(1, rect.height - 2 * inset);
+      const s = Math.max(0.5, Math.min(rw, rh) * params.scale / Math.max(gw, gh));
+      const ox = Math.round(inset + (rw - gw * s) / 2);
+      const oy = Math.round(inset + (rh - gh * s) / 2);
 
       const dotScale = isMobile ? params.dotScale * 0.8 : params.dotScale;
 
@@ -187,6 +254,7 @@ export function DitherCanvas({
     },
     [
       algorithm,
+      inset,
       params.scale,
       params.dotScale,
       params.image.contrast,
@@ -214,6 +282,9 @@ export function DitherCanvas({
     params.invert,
     params.dotColorMode,
     isMobile,
+    inset,
+    interactionScale,
+    interactionEnabled,
   ]);
 
   useEffect(() => {
@@ -222,14 +293,22 @@ export function DitherCanvas({
   }, [warmPresetLogosOnMount]);
 
   useEffect(() => {
-    const configKey = JSON.stringify([imageSrc, paramsKey]);
+    const configKey = JSON.stringify([effectiveImageSrc, paramsKey]);
     if (configKey === prevConfigRef.current) return;
     prevConfigRef.current = configKey;
-    void rebuildParticles(imageSrc).catch((err) => {
-      console.error("[DitherCanvas] Failed to load or process image:", imageSrc, err);
+    void rebuildParticles(effectiveImageSrc).catch((err) => {
+      console.error("[DitherCanvas] Failed to load or process image:", effectiveImageSrc, err);
       onLoadError?.(err);
+      if (
+        fallbackImageSrc &&
+        !fallbackAttemptedRef.current &&
+        effectiveImageSrc !== fallbackImageSrc
+      ) {
+        fallbackAttemptedRef.current = true;
+        setFallbackFromError(fallbackImageSrc);
+      }
     });
-  }, [imageSrc, paramsKey, rebuildParticles, onLoadError]);
+  }, [effectiveImageSrc, paramsKey, rebuildParticles, onLoadError, fallbackImageSrc]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -258,7 +337,7 @@ export function DitherCanvas({
       const h = Math.round(rect.height);
       if (lastWidth !== 0 && (w !== lastWidth || h !== lastHeight)) {
         if (resizeTimer) clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => rebuildParticles(imageSrc), 200);
+        resizeTimer = setTimeout(() => rebuildParticles(effectiveImageSrc), 200);
       }
       lastWidth = w;
       lastHeight = h;
@@ -269,6 +348,7 @@ export function DitherCanvas({
     resizeObserver.observe(canvas);
 
     const handlePointerMove = (e: PointerEvent) => {
+      if (!interactionEnabled) return;
       const rect = canvas.getBoundingClientRect();
       mouseRef.current.x = e.clientX - rect.left;
       mouseRef.current.y = e.clientY - rect.top;
@@ -288,12 +368,14 @@ export function DitherCanvas({
     };
 
     const handlePointerUp = (e: PointerEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      shockwavesRef.current.push({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        start: performance.now(),
-      });
+      if (interactionEnabled) {
+        const rect = canvas.getBoundingClientRect();
+        shockwavesRef.current.push({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+          start: performance.now(),
+        });
+      }
       if (e.pointerType !== "mouse") {
         mouseRef.current.active = false;
       }
@@ -315,17 +397,24 @@ export function DitherCanvas({
       canvas.removeEventListener("pointercancel", handlePointerCancel);
       canvas.removeEventListener("pointerup", handlePointerUp);
     };
-  }, [effDot, sampledDots, startLoop, rebuildParticles, imageSrc]);
+  }, [
+    effDot,
+    sampledDots,
+    startLoop,
+    rebuildParticles,
+    effectiveImageSrc,
+    interactionEnabled,
+  ]);
 
   useEffect(() => {
-    if (!syncPageBackground) return;
+    if (!syncPageBackground || transparentCanvas) return;
     document.documentElement.style.background = effBg;
     document.body.style.background = effBg;
     return () => {
       document.documentElement.style.background = "";
       document.body.style.background = "";
     };
-  }, [syncPageBackground, effBg]);
+  }, [syncPageBackground, transparentCanvas, effBg]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -344,7 +433,11 @@ export function DitherCanvas({
     <canvas
       ref={canvasRef}
       className={className}
-      style={{ cursor: "default", background: effBg, ...style }}
+      style={{
+        cursor: "default",
+        ...(transparentCanvas ? { background: "transparent" } : { background: effBg }),
+        ...style,
+      }}
     />
   );
 }

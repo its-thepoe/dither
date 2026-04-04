@@ -32,7 +32,7 @@ export function MyHero() {
 
 Use any image URL your browser can load (`https:`, `blob:` from a file input, `data:`, etc.). Tune algorithm, colours, blur, and dither settings via `params` (see defaults in the docs below).
 
-**Full API:** props, Next.js App Router (`dynamic` / `transpilePackages`), Turbopack alias tips, uploads (JPEG / PNG / WebP), and CORS are documented in **[`packages/dither-react/README.md`](packages/dither-react/README.md)**.
+**Full API:** props, Next.js App Router (`dynamic` / `transpilePackages`), Turbopack alias tips, uploads (JPEG / PNG / WebP), and CORS are documented in `**[packages/dither-react/README.md](packages/dither-react/README.md)`**.
 
 ---
 
@@ -65,7 +65,7 @@ Open [localhost:3000](http://localhost:3000).
 
 - Live controls for every parameter  
 - Export configurations as JSON or a small JS module  
-- Built with Next.js 15, React 19, Tailwind CSS v4, DialKit  
+- Built with Next.js 15, React 19, Tailwind CSS v4, DialKit
 
 ---
 
@@ -73,6 +73,10 @@ Open [localhost:3000](http://localhost:3000).
 
 - Fork of [lenxism/dither](https://github.com/lenxism/dither).  
 - Inspired by the dither effect [Emil Kowalski](https://x.com/emilkowalski_) built for [linear.app/next](https://linear.app/next) — [original tweet](https://x.com/emilkowalski/status/2036778116748542220).
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) (includes **`@its-thepoe/dither-react`** releases).
 
 ## License
 
