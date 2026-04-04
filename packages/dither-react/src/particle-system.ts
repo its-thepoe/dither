@@ -125,8 +125,8 @@ export function updateDots(
     let targetFy = 0;
 
     if (mouseActive) {
-      const vx = (baseX[i] + dx[i]) - mouseX;
-      const vy = (baseY[i] + dy[i]) - mouseY;
+      const vx = baseX[i] + dx[i] - mouseX;
+      const vy = baseY[i] + dy[i] - mouseY;
       const dist2 = vx * vx + vy * vy;
 
       if (dist2 > 0.1 && dist2 < MOUSE_RADIUS_SQ) {
@@ -152,10 +152,7 @@ export function updateDots(
         const band = Math.abs(dist - radius);
         if (band < SHOCKWAVE_WIDTH) {
           const waveForce =
-            (1 - band / SHOCKWAVE_WIDTH) *
-            life *
-            SHOCKWAVE_STRENGTH *
-            shockMultiplier;
+            (1 - band / SHOCKWAVE_WIDTH) * life * SHOCKWAVE_STRENGTH * shockMultiplier;
           targetFx += (sx / dist) * waveForce;
           targetFy += (sy / dist) * waveForce;
         }

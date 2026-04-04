@@ -153,9 +153,8 @@ export function processImage(
 
       if (highlightsCompression > 0) {
         const norm = luma / 255;
-        const compressed = norm < 0.5
-          ? norm
-          : 0.5 + (norm - 0.5) * (1 - highlightsCompression);
+        const compressed =
+          norm < 0.5 ? norm : 0.5 + (norm - 0.5) * (1 - highlightsCompression);
         luma = compressed * 255;
       }
 

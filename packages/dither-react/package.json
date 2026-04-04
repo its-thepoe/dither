@@ -1,0 +1,49 @@
+{
+  "name": "@its-thepoe/dither-react",
+  "version": "0.1.0",
+  "description": "React canvas dither effect matching the Dither Playground (pointer, shockwaves, presets).",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/its-thepoe/dither.git",
+    "directory": "packages/dither-react"
+  },
+  "keywords": [
+    "react",
+    "canvas",
+    "dither",
+    "floyd-steinberg",
+    "particles"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup && node scripts/copy-assets.mjs",
+    "dev": "tsup --watch"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  }
+}

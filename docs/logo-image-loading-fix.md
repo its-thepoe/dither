@@ -7,7 +7,7 @@
 
 ## Root cause
 
-`ParticleCanvas` called `loadImage(src)` from `image-processing.ts` for every rebuild when the logo source changed. That helper always created a **new** `Image()`, set `src`, and waited for `onload`.
+`ParticleCanvas` / `DitherCanvas` called `loadImage(src)` for every rebuild when the logo source changed. That helper always created a **new** `Image()`, set `src`, and waited for `onload`.
 
 Consequences:
 
@@ -17,20 +17,20 @@ Consequences:
 
 ## Fix
 
-### 1. Cached loader (`src/lib/image-processing.ts`)
+### 1. Cached loader (`packages/dither-react/src/image-processing.ts`)
 
-- **`loadImageCached(src)`** — Keeps a `Map` from URL to the loaded `HTMLImageElement`. If the entry exists and `complete` with `naturalWidth > 0`, returns it immediately.
-- **`imageInflight`** — If a load for that URL is already in progress, all callers share the same `Promise` so concurrent requests do not spawn duplicate `Image()` loads.
+- `**loadImageCached(src)`** — Keeps a `Map` from URL to the loaded `HTMLImageElement`. If the entry exists and `complete` with `naturalWidth > 0`, returns it immediately.
+- `**imageInflight**` — If a load for that URL is already in progress, all callers share the same `Promise` so concurrent requests do not spawn duplicate `Image()` loads.
 - On success, the element is stored in the cache; on failure, the inflight entry is cleared so retries are possible.
 
-### 2. Warm-up on mount (`src/components/particle-canvas.tsx`)
+### 2. Warm-up on mount
 
-- **`warmImageCache(urls)`** — Starts `loadImageCached` for every preset URL (via `Object.values(LOGO_PRESETS)`) inside a `useEffect` on mount.
+- `**warmImageCache(urls)**` — Starts `loadImageCached` for every preset URL (via `Object.values(LOGO_PRESET_URLS)`) when `DitherCanvas` is mounted with `**warmPresetLogosOnMount**` (the playground enables this).
 - Failures are swallowed in the warmer so a broken asset does not break the app; the normal load path still surfaces errors when that preset is actually used.
 
 ### 3. Use the cached API in the processing pipeline
 
-- The effect that loads the logo for dithering now awaits **`loadImageCached(src)`** instead of **`loadImage(src)`**.
+- The pipeline that loads the logo for dithering awaits `**loadImageCached(src)**` instead of `**loadImage(src)**`.
 
 ## Result
 
@@ -40,5 +40,5 @@ Consequences:
 
 ## Files touched
 
-- `src/lib/image-processing.ts` — `loadImageCached`, `warmImageCache`
-- `src/components/particle-canvas.tsx` — mount warm-up; `loadImageCached` for logo loads
+- `packages/dither-react/src/image-processing.ts` — `loadImageCached`, `warmImageCache`
+- `packages/dither-react/src/dither-canvas.tsx` — optional `warmPresetLogosOnMount`; `loadImageCached` for image loads

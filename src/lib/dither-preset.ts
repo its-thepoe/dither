@@ -1,47 +1,22 @@
 import { DialStore } from "dialkit";
+import {
+  LOGO_PRESET_URLS,
+  type DitherCanvasParams,
+  type LogoPresetId,
+} from "@its-thepoe/dither-react";
 
-/** Public paths for built-in logos (single source of truth for export/import). */
-export const LOGO_PRESETS = {
-  linear: "/linear-app-icon.png",
-  cursor: "/cursor-2d-icon.png",
-  dispensary: "/dispensary-app-icon.png",
-  mockhaus: "/mockhaus-icon.png",
-} as const;
+/** Bundled logo URLs from `@its-thepoe/dither-react` (single source of truth for export/import). */
+export const LOGO_PRESETS = LOGO_PRESET_URLS;
 
-export type LogoPresetId = keyof typeof LOGO_PRESETS;
+export type { LogoPresetId };
 
 export const PANEL_NAME = "Dither Playground";
 
-/** Nested control values as returned by `useDialKit` (no action controls). */
-export interface DitherPresetParamsV1 {
-  algorithm: string;
-  scale: number;
-  dotScale: number;
-  invert: boolean;
-  logo: string;
-  image: {
-    threshold: number;
-    contrast: number;
-    gamma: number;
-    blur: number;
-    highlightsCompression: number;
-  };
-  dither: {
-    errorStrength: number;
-    serpentine: boolean;
-  };
-  shape: {
-    cornerRadius: number;
-  };
-  /** Omitted in older exported presets; apply uses DialKit defaults. */
-  color?: {
-    dotLight: string;
-    bgLight: string;
-    dotDark: string;
-    bgDark: string;
-  };
-  dotColorMode?: "solid" | "sampled";
-}
+/** Aligns with `DitherCanvasParams`; optional `color` / `dotColorMode` for older exported JSON. */
+export type DitherPresetParamsV1 = Omit<DitherCanvasParams, "color" | "dotColorMode"> & {
+  color?: DitherCanvasParams["color"];
+  dotColorMode?: DitherCanvasParams["dotColorMode"];
+};
 
 export type DitherPresetImageV1 =
   | { kind: "preset"; preset: LogoPresetId }
@@ -55,8 +30,8 @@ export interface DitherPresetV1 {
 }
 
 function presetIdForSrc(src: string): LogoPresetId | null {
-  for (const id of Object.keys(LOGO_PRESETS) as LogoPresetId[]) {
-    if (src === LOGO_PRESETS[id]) return id;
+  for (const id of Object.keys(LOGO_PRESET_URLS) as LogoPresetId[]) {
+    if (src === LOGO_PRESET_URLS[id]) return id;
   }
   return null;
 }
@@ -227,7 +202,7 @@ export function applyPreset(preset: unknown): ApplyPresetResult {
 
   let imageSrc: string;
   if (p.image.kind === "preset") {
-    imageSrc = LOGO_PRESETS[p.image.preset];
+    imageSrc = LOGO_PRESET_URLS[p.image.preset];
   } else {
     imageSrc = p.image.dataUrl;
   }

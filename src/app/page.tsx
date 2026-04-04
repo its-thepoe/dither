@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useCallback, useState } from "react";
+import { LOGO_PRESET_URLS } from "@its-thepoe/dither-react";
 import ParticleCanvas from "@/components/particle-canvas";
 import { WordmarkSvg } from "@/components/wordmark-svg";
 
@@ -12,7 +13,7 @@ const footerWordmarkClass = "h-4 w-auto shrink-0";
 const poeWordmarkLinkClass = `${footerLinkClass} translate-y-[5px]`;
 
 export default function Home() {
-  const [imageSrc, setImageSrc] = useState("/linear-app-icon.png");
+  const [imageSrc, setImageSrc] = useState(LOGO_PRESET_URLS.linear);
   const inputRef = useRef<HTMLInputElement>(null);
   const blobUrlRef = useRef<string | null>(null);
 

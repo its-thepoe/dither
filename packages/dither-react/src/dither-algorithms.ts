@@ -58,7 +58,7 @@ export function floydSteinberg(
       }
 
       const diffuse = (nx: number, ny: number, weight: number) => {
-        if (nx < 0 || nx >= width || ny >= height) return;
+        if (nx < 0 || nx >= width || ny < 0 || ny >= height) return;
         const ni = ny * width + nx;
         if (hasAlpha && alpha[ni] < 128) return;
         errors[ni] += err * weight;
