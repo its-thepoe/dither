@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-- Nothing yet.
+- Playground: single **Copy preset** control copies full preset JSON to the clipboard (replaces separate JSON/JS downloads).
+- Playground: remove mistaken `label: "Colour"` under DialKit `color` (it registered as an editable `color.label` text field, not a section title).
 
 ## [0.2.0] – 2026-04-05
 

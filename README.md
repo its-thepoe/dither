@@ -47,7 +47,7 @@ Use any image URL your browser can load (`https:`, `blob:` from a file input, `d
 
 ## Try the playground (optional)
 
-This repository also runs a **local demo** with a control panel (DialKit) so you can tweak parameters and export JSON/JS presets.
+This repository also runs a **local demo** with a control panel (DialKit) so you can tweak parameters and **copy the full preset JSON** to your clipboard.
 
 ```bash
 git clone https://github.com/its-thepoe/dither.git
@@ -64,7 +64,7 @@ Open [localhost:3000](http://localhost:3000).
 ## Features (demo app)
 
 - Live controls for every parameter  
-- Export configurations as JSON or a small JS module  
+- Copy the current configuration as JSON to the clipboard  
 - Built with Next.js 15, React 19, Tailwind CSS v4, DialKit
 
 ---

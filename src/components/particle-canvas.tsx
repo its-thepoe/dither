@@ -9,8 +9,6 @@ import {
   type DitherPresetParamsV1,
   buildPresetPayload,
   presetToJsonString,
-  presetToJsModuleString,
-  downloadTextFile,
 } from "@/lib/dither-preset";
 
 interface ParticleCanvasProps {
@@ -27,6 +25,7 @@ export default function ParticleCanvas({
   const prevLogoRef = useRef<string | null>(null);
   const exportRowRef = useRef<HTMLDivElement | null>(null);
   const [exportPortalHost, setExportPortalHost] = useState<HTMLDivElement | null>(null);
+  const [presetCopied, setPresetCopied] = useState(false);
 
   const params = useDialKit("Dither Playground", {
     algorithm: {
@@ -85,7 +84,6 @@ export default function ParticleCanvas({
 
     color: {
       _collapsed: true,
-      label: "Colour",
       dotLight: { type: "color", default: "#000000", label: "Dot light" },
       bgLight: { type: "color", default: "#ffffff", label: "BG light" },
       dotDark: { type: "color", default: "#8a8f99", label: "Dot dark" },
@@ -147,23 +145,15 @@ export default function ParticleCanvas({
     params.dotColorMode,
   ]);
 
-  const handleExportJson = useCallback(async () => {
+  const handleCopyPreset = useCallback(async () => {
     try {
       const payload = await buildPresetPayload(snapshotPresetParams(), imageSrc);
-      downloadTextFile("dither-preset.json", presetToJsonString(payload), "application/json");
+      await navigator.clipboard.writeText(presetToJsonString(payload));
+      setPresetCopied(true);
+      window.setTimeout(() => setPresetCopied(false), 2000);
     } catch (e) {
-      console.error("[ParticleCanvas] Export JSON failed:", e);
-      window.alert("Could not export JSON. See console for details.");
-    }
-  }, [snapshotPresetParams, imageSrc]);
-
-  const handleExportJs = useCallback(async () => {
-    try {
-      const payload = await buildPresetPayload(snapshotPresetParams(), imageSrc);
-      downloadTextFile("dither-preset.js", presetToJsModuleString(payload), "text/javascript");
-    } catch (e) {
-      console.error("[ParticleCanvas] Export JS failed:", e);
-      window.alert("Could not export JS. See console for details.");
+      console.error("[ParticleCanvas] Copy preset failed:", e);
+      window.alert("Could not copy preset to clipboard. See console for details.");
     }
   }, [snapshotPresetParams, imageSrc]);
 
@@ -191,8 +181,7 @@ export default function ParticleCanvas({
       let row = exportRowRef.current;
       if (!row || !row.isConnected) {
         row = document.createElement("div");
-        row.className =
-          "dither-preset-export-row flex w-full gap-1.5 mb-1.5 shrink-0";
+        row.className = "dither-preset-export-row flex w-full mb-1.5 shrink-0";
         exportRowRef.current = row;
       }
 
@@ -241,22 +230,13 @@ export default function ParticleCanvas({
     <>
       {exportPortalHost
         ? createPortal(
-            <>
-              <button
-                type="button"
-                className="dialkit-button min-w-0 flex-1"
-                onClick={() => void handleExportJson()}
-              >
-                Export JSON
-              </button>
-              <button
-                type="button"
-                className="dialkit-button min-w-0 flex-1"
-                onClick={() => void handleExportJs()}
-              >
-                Export JS
-              </button>
-            </>,
+            <button
+              type="button"
+              className="dialkit-button w-full min-w-0"
+              onClick={() => void handleCopyPreset()}
+            >
+              {presetCopied ? "Copied" : "Copy preset"}
+            </button>,
             exportPortalHost
           )
         : null}
