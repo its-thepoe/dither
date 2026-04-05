@@ -150,7 +150,7 @@ cd packages/dither-react && npm publish --access public
 
 1. **`npm whoami`** — must show your username. **401** means run **`npm login`** (token expired or never logged in).
 2. **Scope (fixes `404 Not Found` on `PUT …/@its-thepoe/dither-react`)** — npm only lets you publish `@its-thepoe/…` if you are logged in as the **npm user named `its-thepoe`** *or* your account is in the **`its-thepoe` org** with **publish** access. If your GitHub is `its-thepoe` but your **npm username is different**, create the org on [npmjs.com](https://www.npmjs.com/org/create) and add yourself, **or** change the `name` in this `package.json` to `@<your-npm-username>/dither-react` and update imports everywhere.
-3. **Registry** — `npm config get registry` should be `https://registry.npmjs.org/` for the public registry.
+3. **Registry** — From the **repo root**, run `npm config get registry` (expect `https://registry.npmjs.org/`). If you are inside `packages/dither-react`, npm may error with **`ENOWORKSPACES`**; use `npm config get registry --workspaces=false` or `cd` to the monorepo root first.
 4. Optional: run **`npm pkg fix`** in this folder if npm warns about `package.json` normalization (repository URL is already `git+https://…`).
 
 **List packages you maintain:** `npm access list packages` (not `ls-packages`).
